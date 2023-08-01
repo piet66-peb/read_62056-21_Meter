@@ -1,0 +1,82 @@
+#!/bin/bash
+#h-------------------------------------------------------------------------------
+#h
+#h Name:         settings
+#h Type:         Linux shell script
+#h Purpose:      settings for packet read_LOGAREX
+#h Project:      
+#h Usage:        . `dirname $(readlink -f $0)`/settings
+#h Result:       
+#h Examples:     
+#h Outline:      
+#h Resources:    
+#h Platforms:    Linux
+#h Authors:      peb piet66
+#h Version:      V3.2.0 2023-07-16/peb
+#v History:      V1.0.0 2022-12-25/peb first version
+#h Copyright:    (C) piet66 2022
+#h License:      MIT
+#h
+#h-------------------------------------------------------------------------------
+
+MODULE='settings';
+VERSION='V3.2.0'
+WRITTEN='2023-07-16/peb'
+
+### storage control
+### ---------------
+STORE_LOCAL_RRD=false
+STORE_REMOTE_RRD=true
+STORE_ZWAY=true
+
+### parameters for the specific meter used, according to the device manual
+### ----------------------------------------------------------------------
+DEV=/dev/electric_meter    #serial infrared input device (created with udev rule)
+IEC_62056_21_MODE=C        #valid values: A, B, C, D
+[ $IEC_62056_21_MODE == D ] && BAUD_INI=2400
+if [ "$IEC_62056_21_MODE" == "C" ]
+then
+    DISABLE_BAUD_RATE_CHANGEOVER = false    #true: always use baud rate = 300
+fi
+
+### parameters for rrdtool (local database)
+### ---------------------------------------
+if [ "$STORE_LOCAL_RRD" == true ]
+then
+    export RRD_NAME=electric_meter
+    export RRD_FILE=${RRD_NAME}.rrd
+    export RRD_DIR=../RRDTool_API/rrd
+    #STEP=      #read/write cycle, will be taken from database
+    #NEXT=      #next read/write timestamp, will be taken from database
+fi
+
+### parameters for rrdtool (remote database)
+### ----------------------------------------
+if [ "$STORE_REMOTE_RRD" == true ]
+then
+    export RRD_NAME=electric_meter
+    export IP_RRD=rrd_server
+    export PORT_RRD=5001
+    export URL_RRD="http://$IP_RRD:$PORT_RRD/$RRD_NAME"
+    export USER_RRD=username:secret
+    export REPEAT=5m
+    #STEP=      #read/write cycle, will be taken from database
+    #NEXT=      #next read/write timestamp, will be taken from database
+fi
+
+### parameters for Z-Way
+### --------------------
+if [ "$STORE_ZWAY" == true ]
+then
+    export USER_ZWAY="admin:AnnaCondita1"
+    export IP_ZWAY=zway_server
+    export URL_ZWAY="http://$IP_ZWAY:8083/ZAutomation/api/v1/devices/"
+    STEP=600    #read/write cycle in seconds, only necessary if no database used
+
+    # OBIS codes and ids of target virtual devices: 
+    declare -A ZWAY_devices
+    ZWAY_devices["180"]="MxEnhancedDevice_133"    #1.8.0
+    #ZWAY_devices["160"]="xxxxxxxxxxxxxxxxxxxx"    #1.6.0
+    #ZWAY_devices["280"]="xxxxxxxxxxxxxxxxxxxx"    #2.8.0
+fi
+
