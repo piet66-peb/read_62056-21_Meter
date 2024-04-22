@@ -23,7 +23,7 @@
 #h Resources:    stty, curl
 #h Platforms:    Linux
 #h Authors:      peb piet66
-#h Version:      V3.2.0 2023-07-16/peb
+#h Version:      V3.2.0 2024-04-06/peb
 #v History:      V1.0.0 2022-05-31/peb first version
 #v               V1.3.0 2022-11-20/peb [+]STORE_COMMAND
 #v               V2.0.0 2022-11-20/peb [*]some refactoring
@@ -37,7 +37,7 @@
 
 MODULE='read_meter.bash';
 VERSION='V3.2.0'
-WRITTEN='2023-07-16/peb'
+WRITTEN='2024-04-06/peb'
 
 DIR=`dirname $0`
 cd $DIR
@@ -138,7 +138,7 @@ function create_pull_loop() {
             BAUD=$BAUD_INI
             stty -F $DEV $BAUD
             echo --- baud rate set to $BAUD | tee -a $LOG_SLEEP
-            [ -f "sendEmail.bash" ] && ./sendEmail.bash "baud rate set to $BAUD" &
+            [ -x "sendEmail.bash" ] && ./sendEmail.bash "baud rate set to $BAUD" &
         fi
 
         echo -n -e '/?!\r\n' > $DEV
